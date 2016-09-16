@@ -19,7 +19,7 @@ namespace Lasvegas.Startup
 
             // SwaggerUI, index page: /docs/index
             httpCongiguration
-                .EnableSwagger("swagger/{apiVersion}", c => c.SingleApiVersion("v1", "API Docs"))
+                .EnableSwagger("docs/{apiVersion}/swagger", c => c.SingleApiVersion("v1", "API Docs"))
                 .EnableSwaggerUi("docs/{*assetPath}");
 
             app.UseWebApi(httpCongiguration);
