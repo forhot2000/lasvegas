@@ -11,21 +11,38 @@ namespace Lasvegas.Startup
     {
         public void Configuration(IAppBuilder app)
         {
-            var httpCongiguration = new HttpConfiguration();
+            app.UseWebApi();
+            app.UseNancy();
+        }
+    }
+
+    internal static class IAppBuilderExtension
+    {
+        public static void UseWebApi(this IAppBuilder app)
+        {
+            var config = new HttpConfiguration();
 
             // WebAPIs
-            httpCongiguration.MapHttpAttributeRoutes();
-            httpCongiguration.Routes.MapHttpRoute("apis", "api/v1/{controller}/{id}", new { id = RouteParameter.Optional });
+            config.MapHttpAttributeRoutes();
+            config.Routes.MapHttpRoute("apis", "api/v1/{controller}/{id}", new { id = RouteParameter.Optional });
 
             // SwaggerUI, index page: /docs/index
-            httpCongiguration
-                .EnableSwagger("docs/{apiVersion}/swagger", c => c.SingleApiVersion("v1", "API Docs"))
-                .EnableSwaggerUi("docs/{*assetPath}");
+            config
+                .EnableSwagger("docs/{apiVersion}/swagger", c =>
+                {
+                    c.SingleApiVersion("v1", "API Docs");
+                    c.ApiKey("apiKey")
+                        .Description("API Key Authentication")
+                        .Name("apiKey")
+                        .In("header");
+                })
+                .EnableSwaggerUi("docs/{*assetPath}", c =>
+                {
+                    c.DocExpansion(DocExpansion.List);
+                    c.EnableApiKeySupport("apiKey", "header");
+                });
 
-            app.UseWebApi(httpCongiguration);
-
-            // Nancy
-            app.UseNancy();
+            app.UseWebApi(config);
         }
     }
 }
